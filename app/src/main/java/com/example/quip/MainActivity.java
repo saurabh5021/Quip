@@ -5,9 +5,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,11 +19,11 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.quip.Fragments.ChatsFragment;
+import com.example.quip.Fragments.ProfileFragment;
 import com.example.quip.Fragments.UsersFragment;
 import com.example.quip.Model.User;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -41,14 +43,17 @@ public class MainActivity extends AppCompatActivity {
     FirebaseUser firebaseUser;
     DatabaseReference reference;
 
+    private String[] titles = new String[]{"Chats", "Users", "Profile"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = findViewById( R.id.toolbar );
+        Toolbar toolbar = (Toolbar) findViewById( R.id.toolbar );
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle( "" );
+
 
         profile_image = findViewById(R.id.profile_image);
         username = findViewById(R.id.username);
@@ -76,15 +81,25 @@ public class MainActivity extends AppCompatActivity {
         });
 
         final TabLayout tabLayout = findViewById( R.id.tab_layout );
-        final ViewPager viewPager = findViewById( R.id.view_pager );
+        final ViewPager2 viewPager = findViewById( R.id.view_pager );
 
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        viewPagerAdapter.addFragment( new ChatsFragment(), "Chats" );
-        viewPagerAdapter.addFragment( new UsersFragment(), "Users" );
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(this);
 
-        viewPager.setAdapter( viewPagerAdapter );
+        viewPager.setAdapter(viewPagerAdapter);
+        new TabLayoutMediator(tabLayout, viewPager,((tab, position) -> tab.setText(titles[position]))).attach();
+        
 
-        tabLayout.setupWithViewPager( viewPager );
+
+//        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+//        viewPagerAdapter.addFragment( new ChatsFragment(), "Chats" );
+//        viewPagerAdapter.addFragment( new UsersFragment(), "Users" );
+//        viewPagerAdapter.addFragment( new UsersFragment(), "Profile" );
+//
+//        viewPager.setAdapter( viewPagerAdapter );
+//
+//        new TabLayoutMediator(tabLayout, viewPager,(((tab, position) -> tab.setText(getTitle())))).attach();
+
+        //tabLayout.setupWithViewPager(viewPager)
 
 
 
@@ -120,37 +135,84 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    class ViewPagerAdapter extends FragmentPagerAdapter {
-        private ArrayList<Fragment> fragments;
-        private ArrayList<String> titles;
+      class ViewPagerAdapter extends FragmentStateAdapter{
 
 
-        public ViewPagerAdapter(@NonNull FragmentManager fm) {
-            super(fm);
-            this.fragments = new ArrayList<>();
-            this.titles = new ArrayList<>();
-        }
 
-        @NonNull
-        @Override
-        public Fragment getItem(int position) {
-            return fragments.get( position );
-        }
+          public ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
+              super(fragmentActivity);
+//            this.fragments = new ArrayList<>();
+//            this.titles = new ArrayList<>();
+          }
 
-        @Override
-        public int getCount() {
-            return fragments.size();
-        }
+          @NonNull
+          @Override
+          public Fragment createFragment(int position) {
+              switch (position){
+                  case 0:
+                      return new ChatsFragment();
+                  case 1:
+                      return new UsersFragment();
+                  case 2:
+                      return new ProfileFragment();
+              }
+              return new ChatsFragment();
+          }
 
-        public void addFragment(Fragment fragment, String title) {
-            fragments.add( fragment );
-            titles.add( title );
-        }
+          @Override
+          public int getItemCount() {
+              return titles.length;
+          }
 
-        @Nullable
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return titles.get(position);
-        }
-    }
+//          public void addFragment(Fragment fragment, String title) {
+//            fragments.add( fragment );
+//            titles.add( title );
+//        }
+//
+//          @Nullable
+//        public CharSequence getPageTitle(int position) {
+//            return titles.get(position);
+//        }
+
+//        @Nullable
+//        @Override
+//        public CharSequence getPageTitle(int position) {
+//            return titles.get(position);
+//        }
+      }
+//    class ViewPagerAdapter extends FragmentPagerAdapter {
+//        private ArrayList<Fragment> fragments;
+//        private ArrayList<String> titles;
+//
+//
+//        public ViewPagerAdapter(@NonNull FragmentManager fm) {
+//            super(fm);
+//            this.fragments = new ArrayList<>();
+//            this.titles = new ArrayList<>();
+//        }
+//
+//        @NonNull
+//        @Override
+//        public Fragment getItem(int position) {
+//            return fragments.get( position );
+//        }
+//
+//        @Override
+//        public int getCount() {
+//            return fragments.size();
+//        }
+//
+//        public void addFragment(Fragment fragment, String title) {
+//            fragments.add( fragment );
+//            titles.add( title );
+//        }
+//
+//        @Nullable
+//        @Override
+//        public CharSequence getPageTitle(int position) {
+//            return titles.get(position);
+//        }
+//    }
+
+
 }
