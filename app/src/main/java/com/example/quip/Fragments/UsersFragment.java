@@ -99,7 +99,7 @@ public class UsersFragment extends Fragment {
 
                         for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                             User user = childSnapshot.getValue( User.class );
-                            if (!user.getId().equals( firebaseUser.getUid() )) {
+                            if (user.getId()!=null && !user.getId().equals( firebaseUser.getUid() )) {
                                 mUsers.add(user);
                             }
 

@@ -63,19 +63,19 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 //            holder.last_msg.setVisibility(View.GONE);
 //        }
 //
-//        if (ischat){
-//            if (user.getStatus().equals("online")){
-//                holder.img_on.setVisibility(View.VISIBLE);
-//                holder.img_off.setVisibility(View.GONE);
-//            } else {
-//                holder.img_on.setVisibility(View.GONE);
-//                holder.img_off.setVisibility(View.VISIBLE);
-//            }
-//        } else {
-//            holder.img_on.setVisibility(View.GONE);
-//            holder.img_off.setVisibility(View.GONE);
-//        }
-//
+        if (ischat){
+            if (user.getStatus().equals("online")){
+                holder.img_on.setVisibility(View.VISIBLE);
+                holder.img_off.setVisibility(View.GONE);
+            } else {
+                holder.img_on.setVisibility(View.GONE);
+                holder.img_off.setVisibility(View.VISIBLE);
+            }
+        } else {
+            holder.img_on.setVisibility(View.GONE);
+            holder.img_off.setVisibility(View.GONE);
+        }
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

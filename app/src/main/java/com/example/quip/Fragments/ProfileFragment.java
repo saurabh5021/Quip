@@ -52,7 +52,7 @@ public class ProfileFragment extends Fragment {
     StorageReference storageReference;
     private static final int IMAGE_REQUEST = 1;
     private Uri imageUri;
-    private StorageTask uploadTask;
+    private StorageTask<UploadTask.TaskSnapshot> uploadTask;
 
 
     @Override
@@ -76,7 +76,7 @@ public class ProfileFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 username.setText(user.getUsername());
-                if (user.getImageURL().equals("default")){
+                if (user.getImageURL()!=null &&user.getImageURL().equals("default")){
                     image_profile.setImageResource(R.mipmap.ic_launcher);
                 } else {
 

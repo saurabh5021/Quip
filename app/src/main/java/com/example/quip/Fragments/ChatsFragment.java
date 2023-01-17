@@ -135,7 +135,7 @@ public class ChatsFragment extends Fragment {
                     User user = snapshot.getValue(User.class);
 
                     for(String id : usersList){
-                        if(user.getId().equals(id)){
+                        if(user.getId()!=null && user.getId().equals(id)){
                             if(mUsers.size()!=0){
                                 for(User user1: mUsers){
                                     if(!user.getId().equals(user1.getId())){
