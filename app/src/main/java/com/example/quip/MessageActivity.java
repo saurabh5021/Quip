@@ -1,13 +1,19 @@
 package com.example.quip;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -24,6 +30,9 @@ import com.example.quip.Notifications.Data;
 import com.example.quip.Notifications.MyResponse;
 import com.example.quip.Notifications.Sender;
 import com.example.quip.Notifications.Token;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -32,7 +41,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
+import com.google.firebase.ml.vision.text.FirebaseVisionText;
+import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +59,7 @@ import retrofit2.Response;
 
 public class MessageActivity extends AppCompatActivity {
 
-    //private final int Text_recog_req_code=100;
+    private final int Text_recog_req_code = 100;
 
 
     CircleImageView profile_image;
@@ -110,7 +125,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onClick(View view) {
                 notify = true;
                 String msg = text_send.getText().toString();
-                if (!msg.equals("")){
+                if (!msg.equals("")) {
                     sendMessage(fuser.getUid(), userid, msg);
                 } else {
                     Toast.makeText(MessageActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();
@@ -127,7 +142,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 username.setText(user.getUsername());
-                if (user.getImageURL().equals("default")){
+                if (user.getImageURL().equals("default")) {
                     profile_image.setImageResource(R.mipmap.ic_launcher);
                 } else {
 
@@ -147,14 +162,14 @@ public class MessageActivity extends AppCompatActivity {
     }
 
 
-    private void seenMessage(final String userid){
+    private void seenMessage(final String userid) {
         reference = FirebaseDatabase.getInstance().getReference("Chats");
         seenListener = reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Chat chat = snapshot.getValue(Chat.class);
-                    if (chat.getReceiver().equals(fuser.getUid()) && chat.getSender().equals(userid)){
+                    if (chat.getReceiver().equals(fuser.getUid()) && chat.getSender().equals(userid)) {
                         HashMap<String, Object> hashMap = new HashMap<>();
                         hashMap.put("isseen", true);
                         snapshot.getRef().updateChildren(hashMap);
@@ -189,7 +204,7 @@ public class MessageActivity extends AppCompatActivity {
         chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.exists()){
+                if (!dataSnapshot.exists()) {
                     chatRef.child("id").setValue(userid);
                 }
             }
@@ -261,7 +276,7 @@ public class MessageActivity extends AppCompatActivity {
 //        });
     }
 
-    private void readMesagges(final String myid, final String userid, final String imageurl){
+    private void readMesagges(final String myid, final String userid, final String imageurl) {
         mchat = new ArrayList<>();
 
         reference = FirebaseDatabase.getInstance().getReference("Chats");
@@ -269,10 +284,10 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 mchat.clear();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Chat chat = snapshot.getValue(Chat.class);
                     if (chat.getReceiver().equals(myid) && chat.getSender().equals(userid) ||
-                            chat.getReceiver().equals(userid) && chat.getSender().equals(myid)){
+                            chat.getReceiver().equals(userid) && chat.getSender().equals(myid)) {
                         mchat.add(chat);
                     }
 
@@ -288,7 +303,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-    private void status(String status){
+    private void status(String status) {
         reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
 
         HashMap<String, Object> hashMap = new HashMap<>();
@@ -309,4 +324,76 @@ public class MessageActivity extends AppCompatActivity {
         reference.removeEventListener(seenListener);
         status("offline");
     }
+//
+//    public void textRec(View view) {
+//        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        startActivityForResult(intent, Text_recog_req_code);
+//
+//    }
+//
+//    public void textRecg(View view) {
+//        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+//        startActivityForResult(intent, 1);
+//    }
+//
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult( requestCode, resultCode, data );
+//
+//        if(requestCode==1 && resultCode==RESULT_OK){
+//
+//            Uri uri=data.getData();
+//            try{
+//                Bitmap photo=MediaStore.Images.Media.getBitmap( this.getContentResolver(),uri );
+//                textRecognization(photo);
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//        else if(requestCode==Text_recog_req_code){
+//            if(resultCode==RESULT_OK){
+//                Bitmap photo=(Bitmap)data.getExtras().get("data");
+//                textRecognization(photo);
+//            }
+//            else if(resultCode==RESULT_CANCELED){
+//                Toast.makeText( this, "cancelled", Toast.LENGTH_SHORT ).show();
+//            }
+//            else{
+//                Toast.makeText( this, "Faild to capture", Toast.LENGTH_SHORT ).show();
+//            }
+//        }
+//    }
+//    private void textRecognization(Bitmap photo) {
+//        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(photo);
+//
+//        FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance()
+//                .getCloudTextRecognizer();
+//
+//        Task<FirebaseVisionText> resuit=
+//                detector.processImage( image )
+//                        .addOnSuccessListener( new OnSuccessListener<FirebaseVisionText>() {
+//                            @Override
+//                            public void onSuccess(FirebaseVisionText firebaseVisionText) {
+//                                for(FirebaseVisionText.TextBlock block:firebaseVisionText.getTextBlocks()){
+//                                    Rect boundingBox=block.getBoundingBox();
+//                                    Point[] cornerPoints=block.getCornerPoints();
+//                                    String text=block.getText();
+//                                    text_send.setText( text );
+//                                }
+//
+//                            }
+//                        } )
+//                        .addOnFailureListener(
+//                                new OnFailureListener() {
+//                                    @Override
+//                                    public void onFailure(@NonNull Exception e) {
+//                                        Toast.makeText( MessageActivity.this, "Faild to recognize", Toast.LENGTH_SHORT ).show();
+//                                    }
+//                                });
+//
+//
+//    }
 }
