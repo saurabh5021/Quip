@@ -15,6 +15,7 @@ import com.example.quip.Adapter.UserAdapter;
 import com.example.quip.Model.Chat;
 import com.example.quip.Model.Chatlist;
 import com.example.quip.Model.User;
+import com.example.quip.Notifications.Token;
 import com.example.quip.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -23,7 +24,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
+import com.google.firebase.messaging.FirebaseMessaging;
 
 
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ public class ChatsFragment extends Fragment {
 //            }
 //        });
 
-        //updateToken(FirebaseInstanceId.getInstance().getToken());
+//        updateToken(String.valueOf(FirebaseMessaging.getInstance().getToken()));
 
 
         return view;
